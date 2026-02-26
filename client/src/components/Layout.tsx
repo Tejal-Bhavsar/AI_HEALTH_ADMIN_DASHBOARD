@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, Building2, FileText, Menu } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, UserPlus, ClipboardList, Menu } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface LayoutProps {
@@ -21,10 +21,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r border-gray-200 hidden md:block">
                 <div className="h-16 flex items-center px-6 border-b border-gray-200">
-                    <span className="text-xl font-bold text-indigo-600">HealthAdmin</span>
+                    <Link to="/" className="text-xl font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+                        HealthAdmin
+                    </Link>
                 </div>
                 <nav className="p-4 space-y-1">
-                    <Link to="/" className={linkClass('/')}>
+                    <Link to="/dashboard" className={linkClass('/dashboard')}>
                         <LayoutDashboard className="w-5 h-5 mr-3" />
                         Dashboard
                     </Link>
@@ -36,8 +38,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <Users className="w-5 h-5 mr-3" />
                         Users
                     </Link>
+                    <Link to="/employees" className={linkClass('/employees')}>
+                        <UserPlus className="w-5 h-5 mr-3" />
+                        Employees
+                    </Link>
                     <Link to="/claims" className={linkClass('/claims')}>
-                        <FileText className="w-5 h-5 mr-3" />
+                        <ClipboardList className="w-5 h-5 mr-3" />
                         Claims
                     </Link>
                 </nav>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import client from '../api/client';
-import { Building2, Users } from 'lucide-react';
+import { Building2, Users, ClipboardList, UserPlus } from 'lucide-react';
 
 interface Company {
     id: number;
@@ -9,23 +9,44 @@ interface Company {
     created_at: string;
 }
 
+interface Employee {
+    id: number;
+}
+
+interface Claim {
+    id: number;
+    status: string;
+}
+
 const Dashboard: React.FC = () => {
     const [companies, setCompanies] = useState<Company[]>([]);
+    const [employeesCount, setEmployeesCount] = useState(0);
+    const [pendingClaimsCount, setPendingClaimsCount] = useState(0);
+    const [usersCount, setUsersCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUtilities = async () => {
+        const fetchData = async () => {
             try {
-                const response = await client.get('/companies');
-                setCompanies(response.data);
+                const [companiesRes, employeesRes, claimsRes, usersRes] = await Promise.all([
+                    client.get('/companies'),
+                    client.get('/employees'),
+                    client.get('/claims'),
+                    client.get('/users')
+                ]);
+
+                setCompanies(companiesRes.data);
+                setEmployeesCount(employeesRes.data.length);
+                setPendingClaimsCount(claimsRes.data.filter((c: any) => c.status === 'pending').length);
+                setUsersCount(usersRes.data.length);
             } catch (error) {
-                console.error('Failed to fetch companies:', error);
+                console.error('Failed to fetch dashboard data:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchUtilities();
+        fetchData();
     }, []);
 
     return (
@@ -35,27 +56,45 @@ const Dashboard: React.FC = () => {
                 <p className="mt-1 text-sm text-gray-500">Overview of your health administration system.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div className="bg-blue-50 p-3 rounded-lg">
                             <Building2 className="w-6 h-6 text-blue-600" />
                         </div>
-                        <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
                     </div>
                     <h3 className="text-sm font-medium text-gray-500">Total Companies</h3>
                     <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? '...' : companies.length}</p>
                 </div>
 
-                {/* Placeholder Cards */}
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="bg-green-50 p-3 rounded-lg">
+                            <Users className="w-6 h-6 text-green-600" />
+                        </div>
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-500">Total Users</h3>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? '...' : usersCount}</p>
+                </div>
+
                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div className="bg-purple-50 p-3 rounded-lg">
-                            <Users className="w-6 h-6 text-purple-600" />
+                            <UserPlus className="w-6 h-6 text-purple-600" />
                         </div>
                     </div>
-                    <h3 className="text-sm font-medium text-gray-500">Active Users</h3>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">--</p>
+                    <h3 className="text-sm font-medium text-gray-500">Total Employees</h3>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? '...' : employeesCount}</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="bg-amber-50 p-3 rounded-lg">
+                            <ClipboardList className="w-6 h-6 text-amber-600" />
+                        </div>
+                    </div>
+                    <h3 className="text-sm font-medium text-gray-500">Pending Claims</h3>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{loading ? '...' : pendingClaimsCount}</p>
                 </div>
             </div>
 

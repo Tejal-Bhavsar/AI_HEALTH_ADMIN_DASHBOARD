@@ -21,9 +21,15 @@ router.post('/', async (req, res) => {
             [email, password_hash, role, company_id]
         );
         res.status(201).json(result.rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal server error' });
+    } catch (err: any) {
+        console.error('Error creating user:', err);
+        if (err.code === '23505') {
+            res.status(400).json({ error: 'Email already exists' });
+        } else if (err.code === '23503') {
+            res.status(400).json({ error: 'Invalid company selected' });
+        } else {
+            res.status(500).json({ error: `Internal server error: ${err.message}` });
+        }
     }
 });
 
